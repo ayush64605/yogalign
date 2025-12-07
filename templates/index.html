@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Yoga Pose Scoring</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #c3e8f5 0%, #f9f9fb 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      color: #2a2a2a;
+    }
+    .container {
+      background: white;
+      padding: 40px 50px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      width: 90%;
+      max-width: 700px;
+      text-align: center;
+      animation: fadeIn 0.6s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h1 {
+      font-size: 2rem;
+      color: #0078aa;
+      margin-bottom: 10px;
+    }
+    h1 span {
+      font-size: 2.4rem;
+    }
+    p.subtitle {
+      font-size: 1rem;
+      color: #666;
+      margin-bottom: 30px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      align-items: center;
+    }
+    label {
+      background: #f2f7f8;
+      padding: 15px 25px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 400px;
+      cursor: pointer;
+      border: 2px dashed #b4d5de;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    label:hover {
+      background: #e4f3f8;
+      border-color: #0078aa;
+    }
+    input[type="file"] {
+      display: none;
+    }
+    .preview {
+      margin-top: 10px;
+      display: none;
+    }
+    .preview img {
+      width: 200px;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+    .preview img:hover {
+      transform: scale(1.05);
+    }
+    button {
+      background: #0078aa;
+      color: white;
+      border: none;
+      padding: 12px 35px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s ease;
+      margin-top: 20px;
+    }
+    button:hover {
+      background: #005f88;
+    }
+    .result {
+      margin-top: 40px;
+      background: #f9fcfd;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+      text-align: center;
+      animation: fadeIn 0.8s ease-in-out;
+    }
+    .result h2 {
+      color: #0078aa;
+      margin-bottom: 20px;
+    }
+    .images {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .images img {
+      width: 200px;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+    .images img:hover {
+      transform: scale(1.05);
+    }
+    .error {
+      color: red;
+      font-weight: 600;
+      margin-top: 20px;
+    }
+    footer {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧘‍♀️ <span>AI Yoga Pose Scoring</span></h1>
+    <p class="subtitle">Upload your front, rear, and side images to analyze your pose alignment.</p>
+
+    <form method="POST" enctype="multipart/form-data">
+      <!-- FRONT -->
+      <label>
+        📸 Upload Front Image
+        <input type="file" name="front" accept="image/*" required onchange="previewImage(event, 'frontPreview')">
+        <div id="frontPreview" class="preview"><img src="#" alt="Front Preview"></div>
+      </label>
+
+      <!-- REAR -->
+      <label>
+        📸 Upload Rear Image
+        <input type="file" name="rear" accept="image/*" required onchange="previewImage(event, 'rearPreview')">
+        <div id="rearPreview" class="preview"><img src="#" alt="Rear Preview"></div>
+      </label>
+
+      <!-- SIDE -->
+      <label>
+        📸 Upload Side Image
+        <input type="file" name="side" accept="image/*" required onchange="previewImage(event, 'sidePreview')">
+        <div id="sidePreview" class="preview"><img src="#" alt="Side Preview"></div>
+      </label>
+
+      <button type="submit">✨ Upload & Score</button>
+    </form>
+
+    {% if error %}
+      <p class="error">{{ error }}</p>
+    {% endif %}
+
+    {% if score %}
+    <div class="result">
+      <h2>Final Score: 🌟 {{ score }}/10</h2>
+      <div class="images">
+        <img src="{{ annotated.front }}" alt="Front View">
+        <img src="{{ annotated.rear }}" alt="Rear View">
+        <img src="{{ annotated.side }}" alt="Side View">
+      </div>
+    </div>
+    {% endif %}
+
+    <footer>
+      © {{ year or "2025" }} Physio-AI | Developed by <b>Khyati Dholariya</b>
+    </footer>
+  </div>
+
+  <script>
+    function previewImage(event, previewId) {
+      const input = event.target;
+      const preview = document.getElementById(previewId);
+      const img = preview.querySelector('img');
+
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          img.src = e.target.result;
+          preview.style.display = 'block';
+        }
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+  </script>
+</body>
+</html>
